@@ -1,0 +1,13 @@
+node_modules/
+.expo/
+.env
+.env.local
+*.log
+*.pyc
+.DS_Store
+.claude/
+*.ipa
+*.apk
+restored_*
+accountsscreen_extracted*
+ACCOUNTSSCREEN_ORIGINAL*
