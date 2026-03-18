@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, ScrollView, Platform, Keyboard, Pressable, Switch, Alert, Animated } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, FlatList, TouchableOpacity, TextInput, Keyboard, Pressable, Switch } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from '../components/SafeAreaView';
 import { PLATFORM_ICONS, PLATFORM_VISIBILITY_TERMS } from '../utils/platformIcons';
 import ConfirmPrivacyTogglePopup from '../components/ConfirmPrivacyTogglePopup';
+import BottomSheet from '../components/BottomSheet';
 import { mockConnections } from '../data/mockConnections';
 
 interface Handle {
@@ -31,64 +32,12 @@ export default function AccountsScreen() {
   const [editingHandleIndex, setEditingHandleIndex] = useState<number | null>(null);
   const [handleInput, setHandleInput] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'added' | 'other'>('added');
   const [isPublic, setIsPublic] = useState(false);
   const [privacyPopupVisible, setPrivacyPopupVisible] = useState(false);
   const [popupOriginalState, setPopupOriginalState] = useState(false);
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const sheetTranslateY = useRef(new Animated.Value(500)).current;
   const insets = useSafeAreaInsets();
-
-  useEffect(() => {
-    const keyboardShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-    const keyboardHideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
-
-    return () => {
-      keyboardShowListener.remove();
-      keyboardHideListener.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (modalVisible) {
-      Animated.parallel([
-        Animated.timing(overlayOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(overlayOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 500,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [modalVisible, overlayOpacity, sheetTranslateY]);
-
-
-  const handleOverlayPress = () => {
-    if (keyboardVisible) {
-      Keyboard.dismiss();
-    } else {
-      setModalVisible(false);
-    }
-  };
 
   const handleAddHandle = () => {
     if (!editingPlatform || !handleInput.trim()) return;
@@ -203,6 +152,13 @@ export default function AccountsScreen() {
   return (
     <SafeAreaView edges={['left', 'right']} backgroundColor="#E8E9EB" style={{ paddingTop: 5 }}>
       <View style={{ flex: 1 }}>
+        {/* Header Title */}
+        <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+          <Text style={{ fontSize: 28, fontWeight: '700', color: '#0D1B1E' }}>
+            Accounts
+          </Text>
+        </View>
+
         {/* Search Bar */}
         <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}>
           <TextInput
@@ -271,7 +227,7 @@ export default function AccountsScreen() {
                 fontSize: 14,
               }}
             >
-              Other Accounts
+              All Platforms
             </Text>
           </Pressable>
         </View>
@@ -426,159 +382,132 @@ export default function AccountsScreen() {
 
       </View>
 
-      {/* Add/Edit Modal */}
-      <Modal visible={modalVisible} transparent animationType="none">
-        <Animated.View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            opacity: overlayOpacity,
-          }}
-          onTouchEnd={handleOverlayPress}
-        />
-
-        <Animated.View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: '#FFFFFF',
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            paddingHorizontal: 16,
-            paddingTop: 20,
-            paddingBottom: Math.max(insets.bottom, 16),
-            maxHeight: '80%',
-            transform: [{ translateY: sheetTranslateY }],
-          }}
-        >
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <View style={{ marginBottom: 12 }}>
-                <Text style={{ fontSize: 16, fontWeight: '600', color: '#0D1B1E', marginBottom: 12 }}>
-                  {editingPlatform ? 'Add ' + (ALL_PLATFORMS.find(p => p.id === editingPlatform)?.label || editingPlatform) : 'Select Platform'}
+      {/* Add/Edit Platform BottomSheet */}
+      <BottomSheet
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title={editingPlatform ? 'Add ' + (ALL_PLATFORMS.find(p => p.id === editingPlatform)?.label || editingPlatform) : 'Select Platform'}
+        actions={
+          editingPlatform ? (
+            <>
+              <TouchableOpacity
+                onPress={handleAddHandle}
+                disabled={!handleInput.trim()}
+                style={{
+                  backgroundColor: handleInput.trim() ? '#0D1B1E' : '#D1D5DB',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                  marginBottom: 8,
+                }}
+              >
+                <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>
+                  Add Handle
                 </Text>
+              </TouchableOpacity>
 
-                {!editingPlatform ? (
-                  <View style={{ gap: 8 }}>
-                    {ALL_PLATFORMS.map((platform) => (
-                      <TouchableOpacity
-                        key={platform.id}
-                        onPress={() => {
-                          setEditingPlatform(platform.id);
-                          setHandleInput('');
-                          setIsPublic(false);
-                        }}
-                        style={{
-                          backgroundColor: '#F3F4F6',
-                          borderRadius: 8,
-                          paddingVertical: 12,
-                          paddingHorizontal: 12,
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 12,
-                        }}
-                      >
-                        {platform.icon ? (
-                          <MaterialCommunityIcons name={platform.icon} size={24} color="#0D1B1E" />
-                        ) : (
-                          <View style={{ width: 24, height: 24, backgroundColor: '#E5E7EB', borderRadius: 4 }} />
-                        )}
-                        <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
-                          {platform.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setEditingPlatform(null);
+                  setHandleInput('');
+                  setIsPublic(false);
+                }}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#D1D5DB',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: '#6B7280', fontWeight: '600', fontSize: 14 }}>
+                  Back
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : null
+        }
+      >
+        {!editingPlatform ? (
+          <View style={{ gap: 8 }}>
+            {ALL_PLATFORMS.map((platform) => (
+              <TouchableOpacity
+                key={platform.id}
+                onPress={() => {
+                  setEditingPlatform(platform.id);
+                  setHandleInput('');
+                  setIsPublic(false);
+                }}
+                style={{
+                  backgroundColor: '#F3F4F6',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  paddingHorizontal: 12,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                {platform.icon ? (
+                  <MaterialCommunityIcons name={platform.icon} size={24} color="#0D1B1E" />
                 ) : (
-                  <View>
-                    <TextInput
-                      placeholder="Enter handle"
-                      placeholderTextColor={'#9CA3AF'}
-                      value={handleInput}
-                      onChangeText={setHandleInput}
-                      style={{
-                        backgroundColor: '#F3F4F6',
-                        borderRadius: 8,
-                        paddingHorizontal: 12,
-                        paddingVertical: 10,
-                        fontSize: 14,
-                        color: '#0D1B1E',
-                        marginBottom: 12,
-                      }}
-                    />
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                      <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
-                        Public
-                      </Text>
-                      <Switch
-                        value={isPublic}
-                        onValueChange={setIsPublic}
-                        trackColor={{ false: '#E5E7EB', true: '#FECACA' }}
-                        thumbColor={isPublic ? '#F12838' : '#D1D5DB'}
-                      />
-                    </View>
-
-                    {isPublic && (
-                      <View
-                        style={{
-                          backgroundColor: '#FEE2E2',
-                          borderRadius: 8,
-                          paddingHorizontal: 12,
-                          paddingVertical: 8,
-                          marginBottom: 16,
-                        }}
-                      >
-                        <Text style={{ fontSize: 12, color: '#991B1B', lineHeight: 16 }}>
-                          {PLATFORM_VISIBILITY_TERMS[editingPlatform as keyof typeof PLATFORM_VISIBILITY_TERMS] ||
-                            'This account will be visible to your connections.'}
-                        </Text>
-                      </View>
-                    )}
-
-                    <TouchableOpacity
-                      onPress={handleAddHandle}
-                      disabled={!handleInput.trim()}
-                      style={{
-                        backgroundColor: handleInput.trim() ? '#F12838' : '#D1D5DB',
-                        borderRadius: 8,
-                        paddingVertical: 12,
-                        alignItems: 'center',
-                        marginBottom: 8,
-                      }}
-                    >
-                      <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>
-                        Add Handle
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => {
-                        setEditingPlatform(null);
-                        setHandleInput('');
-                        setIsPublic(false);
-                      }}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: '#E5E7EB',
-                        borderRadius: 8,
-                        paddingVertical: 12,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Text style={{ color: '#6B7280', fontWeight: '600', fontSize: 14 }}>
-                        Back
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  <View style={{ width: 24, height: 24, backgroundColor: '#E5E7EB', borderRadius: 4 }} />
                 )}
+                <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
+                  {platform.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <View>
+            <TextInput
+              placeholder="Enter handle"
+              placeholderTextColor={'#9CA3AF'}
+              value={handleInput}
+              onChangeText={setHandleInput}
+              style={{
+                backgroundColor: '#F3F4F6',
+                borderRadius: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                fontSize: 14,
+                color: '#0D1B1E',
+                marginBottom: 12,
+              }}
+            />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
+                Public
+              </Text>
+              <Switch
+                value={isPublic}
+                onValueChange={setIsPublic}
+                trackColor={{ false: '#E5E7EB', true: '#FECACA' }}
+                thumbColor={isPublic ? '#F12838' : '#D1D5DB'}
+              />
+            </View>
+
+            {isPublic && (
+              <View
+                style={{
+                  backgroundColor: '#FEE2E2',
+                  borderRadius: 8,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  marginBottom: 16,
+                }}
+              >
+                <Text style={{ fontSize: 12, color: '#991B1B', lineHeight: 16 }}>
+                  {PLATFORM_VISIBILITY_TERMS[editingPlatform as keyof typeof PLATFORM_VISIBILITY_TERMS] ||
+                    'This account will be visible to your connections.'}
+                </Text>
               </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </Animated.View>
-      </Modal>
+            )}
+          </View>
+        )}
+      </BottomSheet>
 
       {/* Privacy Toggle Confirmation Popup */}
       {privacyPopupVisible && (
