@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  Modal,
   TouchableOpacity,
   ScrollView,
   Pressable,
-  Animated,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Modal from 'react-native-modal';
 import type { RequestItem } from '../data/mockRequests';
 import { PLATFORM_ICONS } from '../utils/platformIcons';
 import { PlatformIcon } from './PlatformIcon';
@@ -61,8 +60,6 @@ export default function RequestDetailModal({
   const insets = useSafeAreaInsets();
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [originalPlatforms, setOriginalPlatforms] = useState<Set<string>>(new Set());
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const sheetTranslateY = useRef(new Animated.Value(500)).current;
 
   // Reset selected items when modal opens
   useEffect(() => {
@@ -73,37 +70,6 @@ export default function RequestDetailModal({
       setOriginalPlatforms(platformsSet);
     }
   }, [isVisible, request?.id]);
-
-  // Handle modal animations
-  useEffect(() => {
-    if (isVisible) {
-      Animated.parallel([
-        Animated.timing(overlayOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(overlayOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 500,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [isVisible, overlayOpacity, sheetTranslateY]);
 
   // Check if selection has changed
   const hasChanges = selectedItems.size !== originalPlatforms.size ||
@@ -153,24 +119,32 @@ export default function RequestDetailModal({
 
   return (
     <Modal
-      visible={isVisible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
+      isVisible={isVisible}
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      swipeDirection="down"
+      onSwipeComplete={onClose}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={300}
+      animationOutTiming={300}
+      backdropTransitionOutTiming={300}
+      useNativeDriver
+      hideModalContentWhileAnimating
+      style={{ margin: 0, justifyContent: 'flex-end' }}
     >
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <Animated.View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', opacity: overlayOpacity }}>
-          <Animated.View style={{ flex: 1, transform: [{ translateY: sheetTranslateY }] }}>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#FFFFFF',
-                marginTop: 100,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                overflow: 'hidden',
-              }}
-            >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ backgroundColor: '#FFFFFF', borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+      >
+        <View
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
+          }}
+        >
             <ScrollView style={{ flex: 1 }} scrollEnabled={true} keyboardShouldPersistTaps="handled">
             {/* Header */}
             <View
@@ -643,10 +617,8 @@ export default function RequestDetailModal({
                 </TouchableOpacity>
               </>
             )}
-          </View>
         </View>
-        </Animated.View>
-        </Animated.View>
+      </View>
       </KeyboardAvoidingView>
     </Modal>
   );

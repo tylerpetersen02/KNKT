@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TextInput,
   Pressable,
   Keyboard,
+  Animated,
 } from 'react-native';
 import { SafeAreaScrollView } from '../components/SafeAreaScrollView';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,6 +25,24 @@ export default function ConnectionsScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
   const { sortPreference, setSortPreference } = useSortPreference();
+  const slideAnim = useRef(new Animated.Value(1000)).current;
+
+  // Animate detail view slide in/out
+  useEffect(() => {
+    if (selectedId) {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: 1000,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [selectedId, slideAnim]);
 
   // Helper function to sort connections
   const sortConnections = (connections: typeof mockConnections) => {
@@ -71,7 +90,13 @@ export default function ConnectionsScreen() {
   // Detail view
   if (selectedConnection) {
     return (
-      <SafeAreaScrollView scrollable {...detailSwipeHandlers}>
+      <Animated.View
+        style={{
+          flex: 1,
+          transform: [{ translateX: slideAnim }],
+        }}
+      >
+        <SafeAreaScrollView scrollable {...detailSwipeHandlers}>
         <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
           {/* Back Button */}
           <TouchableOpacity
@@ -352,6 +377,7 @@ export default function ConnectionsScreen() {
           )}
         </View>
       </SafeAreaScrollView>
+      </Animated.View>
     );
   }
 

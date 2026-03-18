@@ -1,15 +1,14 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  Modal,
   TouchableOpacity,
   ScrollView,
-  Animated,
   Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Modal from 'react-native-modal';
 import Button from './Button';
 
 interface SideMenuProps {
@@ -33,42 +32,6 @@ interface MenuSection {
 
 export default function SideMenu({ isVisible, onClose, onLogout }: SideMenuProps) {
   const insets = useSafeAreaInsets();
-  const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const [modalVisible, setModalVisible] = useState(false);
-
-  useEffect(() => {
-    if (isVisible) {
-      setModalVisible(true);
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(overlayOpacity, {
-          toValue: 0.5,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: MENU_WIDTH,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(overlayOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setModalVisible(false);
-      });
-    }
-  }, [isVisible, slideAnim, overlayOpacity]);
 
   const handleLogout = () => {
     onClose();
@@ -102,36 +65,24 @@ export default function SideMenu({ isVisible, onClose, onLogout }: SideMenuProps
   ];
 
   return (
-    <Modal visible={modalVisible} transparent animationType="none" onRequestClose={onClose}>
-      {/* Overlay */}
-      <Animated.View
+    <Modal
+      isVisible={isVisible}
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      animationIn="slideInRight"
+      animationOut="slideOutRight"
+      animationInTiming={300}
+      animationOutTiming={300}
+      backdropTransitionOutTiming={300}
+      useNativeDriver
+      hideModalContentWhileAnimating
+      style={{ margin: 0, flexDirection: 'row', justifyContent: 'flex-end' }}
+    >
+      <View
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: '#000000',
-          opacity: overlayOpacity,
-        }}
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={onClose}
-          style={{ flex: 1 }}
-        />
-      </Animated.View>
-
-      {/* Menu */}
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
           width: MENU_WIDTH,
           height: '100%',
           backgroundColor: '#F9FAFB',
-          transform: [{ translateX: slideAnim }],
         }}
       >
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
@@ -232,7 +183,7 @@ export default function SideMenu({ isVisible, onClose, onLogout }: SideMenuProps
         >
           <Button label="Logout" variant="danger" onPress={handleLogout} />
         </View>
-      </Animated.View>
+      </View>
     </Modal>
   );
 }

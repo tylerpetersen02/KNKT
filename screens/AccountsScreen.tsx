@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from '../components/SafeAreaView';
 import { PLATFORM_ICONS, PLATFORM_VISIBILITY_TERMS } from '../utils/platformIcons';
-import ConfirmPrivacyTogglePopup from '../components/ConfirmPrivacyTogglePopup';
 import BottomSheet from '../components/BottomSheet';
 import { mockConnections } from '../data/mockConnections';
 
@@ -32,11 +31,10 @@ export default function AccountsScreen() {
   const [editingHandleIndex, setEditingHandleIndex] = useState<number | null>(null);
   const [handleInput, setHandleInput] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'added' | 'other'>('added');
   const [isPublic, setIsPublic] = useState(false);
-  const [privacyPopupVisible, setPrivacyPopupVisible] = useState(false);
-  const [popupOriginalState, setPopupOriginalState] = useState(false);
   const insets = useSafeAreaInsets();
 
   const handleAddHandle = () => {
@@ -63,6 +61,30 @@ export default function AccountsScreen() {
     setModalVisible(false);
   };
 
+  const handleUpdateHandle = () => {
+    if (!editingPlatform || editingHandleIndex === null || !handleInput.trim()) return;
+
+    const updatedAccounts = accounts.map(account => {
+      if (account.platform === editingPlatform) {
+        const updatedHandles = [...account.handles];
+        updatedHandles[editingHandleIndex] = {
+          ...updatedHandles[editingHandleIndex],
+          value: handleInput.trim(),
+          isPublic,
+        };
+        return { ...account, handles: updatedHandles };
+      }
+      return account;
+    });
+
+    setAccounts(updatedAccounts);
+    setHandleInput('');
+    setIsPublic(false);
+    setEditingPlatform(null);
+    setEditingHandleIndex(null);
+    setModalVisible(false);
+  };
+
   const handleDeleteHandle = (platform: string, index: number) => {
     const updatedAccounts = accounts.map(account => {
       if (account.platform === platform) {
@@ -77,29 +99,33 @@ export default function AccountsScreen() {
     setAccounts(updatedAccounts);
   };
 
-  const handleTogglePrivacy = (platform: string, handleIndex: number, newIsPublic: boolean) => {
-    setPopupOriginalState(!newIsPublic);
-    setPrivacyPopupVisible(true);
-    setEditingPlatform(platform);
-    setEditingHandleIndex(handleIndex);
-    setIsPublic(newIsPublic);
+  const openAddModal = (platform?: string) => {
+    setModalMode('add');
+    if (platform) {
+      setEditingPlatform(platform);
+      const platformAccount = otherAccounts.find(a => a.platform === platform);
+      if (platformAccount && platformAccount.handles.length > 0) {
+        setHandleInput(platformAccount.handles[0].value);
+        setIsPublic(platformAccount.handles[0].isPublic);
+      }
+    } else {
+      setEditingPlatform(null);
+      setHandleInput('');
+      setIsPublic(false);
+    }
+    setModalVisible(true);
   };
 
-  const confirmPrivacyToggle = () => {
-    if (editingPlatform !== null && editingHandleIndex !== null) {
-      const updatedAccounts = accounts.map(account => {
-        if (account.platform === editingPlatform) {
-          const updatedHandles = [...account.handles];
-          updatedHandles[editingHandleIndex].isPublic = isPublic;
-          return { ...account, handles: updatedHandles };
-        }
-        return account;
-      });
-      setAccounts(updatedAccounts);
-      setPrivacyPopupVisible(false);
-      setEditingPlatform(null);
-      setEditingHandleIndex(null);
+  const openEditModal = (platform: string, handleIndex: number) => {
+    setModalMode('edit');
+    setEditingPlatform(platform);
+    setEditingHandleIndex(handleIndex);
+    const account = accounts.find(a => a.platform === platform);
+    if (account) {
+      setHandleInput(account.handles[handleIndex].value);
+      setIsPublic(account.handles[handleIndex].isPublic);
     }
+    setModalVisible(true);
   };
 
   const myAccounts = accounts;
@@ -152,13 +178,6 @@ export default function AccountsScreen() {
   return (
     <SafeAreaView edges={['left', 'right']} backgroundColor="#E8E9EB" style={{ paddingTop: 5 }}>
       <View style={{ flex: 1 }}>
-        {/* Header Title */}
-        <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
-          <Text style={{ fontSize: 28, fontWeight: '700', color: '#0D1B1E' }}>
-            Accounts
-          </Text>
-        </View>
-
         {/* Search Bar */}
         <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}>
           <TextInput
@@ -285,25 +304,21 @@ export default function AccountsScreen() {
                         </Text>
                       </View>
 
-                      <View style={{ flexDirection: 'row', gap: 8 }}>
-                        <TouchableOpacity
-                          onPress={() => handleTogglePrivacy(account.platform, index, !handle.isPublic)}
-                          style={{ padding: 8 }}
-                        >
-                          <MaterialCommunityIcons
-                            name={handle.isPublic ? 'eye' : 'eye-off'}
-                            size={20}
-                            color="#6B7280"
-                          />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                          onPress={() => handleDeleteHandle(account.platform, index)}
-                          style={{ padding: 8 }}
-                        >
-                          <MaterialCommunityIcons name="trash-can-outline" size={20} color="#EF4444" />
-                        </TouchableOpacity>
-                      </View>
+                      <TouchableOpacity
+                        onPress={() => openEditModal(account.platform, index)}
+                        style={{
+                          backgroundColor: '#0D1B1E',
+                          paddingHorizontal: 12,
+                          paddingVertical: 8,
+                          borderRadius: 6,
+                          minWidth: 70,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Text style={{ fontSize: 12, fontWeight: '600', color: '#FFFFFF' }}>
+                          Edit
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                   ))}
                 </View>
@@ -360,6 +375,7 @@ export default function AccountsScreen() {
                     </View>
 
                     <TouchableOpacity
+                      onPress={() => openAddModal(account.platform)}
                       style={{
                         backgroundColor: '#0D1B1E',
                         paddingHorizontal: 12,
@@ -385,13 +401,27 @@ export default function AccountsScreen() {
       {/* Add/Edit Platform BottomSheet */}
       <BottomSheet
         isVisible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title={editingPlatform ? 'Add ' + (ALL_PLATFORMS.find(p => p.id === editingPlatform)?.label || editingPlatform) : 'Select Platform'}
+        onClose={() => {
+          setModalVisible(false);
+          setTimeout(() => {
+            setEditingPlatform(null);
+            setHandleInput('');
+            setIsPublic(false);
+            setEditingHandleIndex(null);
+          }, 300);
+        }}
+        title={
+          !editingPlatform
+            ? 'Select Platform'
+            : modalMode === 'add'
+            ? 'Add ' + (ALL_PLATFORMS.find(p => p.id === editingPlatform)?.label || editingPlatform)
+            : 'Edit ' + (ALL_PLATFORMS.find(p => p.id === editingPlatform)?.label || editingPlatform)
+        }
         actions={
           editingPlatform ? (
             <>
               <TouchableOpacity
-                onPress={handleAddHandle}
+                onPress={modalMode === 'add' ? handleAddHandle : handleUpdateHandle}
                 disabled={!handleInput.trim()}
                 style={{
                   backgroundColor: handleInput.trim() ? '#0D1B1E' : '#D1D5DB',
@@ -402,15 +432,39 @@ export default function AccountsScreen() {
                 }}
               >
                 <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>
-                  Add Handle
+                  {modalMode === 'add' ? 'Confirm' : 'Update'}
                 </Text>
               </TouchableOpacity>
 
+              {modalMode === 'edit' && (
+                <TouchableOpacity
+                  onPress={() => {
+                    if (editingPlatform && editingHandleIndex !== null) {
+                      handleDeleteHandle(editingPlatform, editingHandleIndex);
+                      setModalVisible(false);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#EF4444',
+                    borderRadius: 8,
+                    paddingVertical: 12,
+                    alignItems: 'center',
+                    marginBottom: 8,
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
                 onPress={() => {
+                  setModalVisible(false);
                   setEditingPlatform(null);
                   setHandleInput('');
                   setIsPublic(false);
+                  setEditingHandleIndex(null);
                 }}
                 style={{
                   borderWidth: 1,
@@ -421,105 +475,61 @@ export default function AccountsScreen() {
                 }}
               >
                 <Text style={{ color: '#6B7280', fontWeight: '600', fontSize: 14 }}>
-                  Back
+                  {modalMode === 'edit' ? 'Cancel' : 'Back'}
                 </Text>
               </TouchableOpacity>
             </>
           ) : null
         }
       >
-        {!editingPlatform ? (
-          <View style={{ gap: 8 }}>
-            {ALL_PLATFORMS.map((platform) => (
-              <TouchableOpacity
-                key={platform.id}
-                onPress={() => {
-                  setEditingPlatform(platform.id);
-                  setHandleInput('');
-                  setIsPublic(false);
-                }}
-                style={{
-                  backgroundColor: '#F3F4F6',
-                  borderRadius: 8,
-                  paddingVertical: 12,
-                  paddingHorizontal: 12,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 12,
-                }}
-              >
-                {platform.icon ? (
-                  <MaterialCommunityIcons name={platform.icon} size={24} color="#0D1B1E" />
-                ) : (
-                  <View style={{ width: 24, height: 24, backgroundColor: '#E5E7EB', borderRadius: 4 }} />
-                )}
-                <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
-                  {platform.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        <View>
+          <TextInput
+            placeholder="Enter handle"
+            placeholderTextColor={'#9CA3AF'}
+            value={handleInput}
+            onChangeText={setHandleInput}
+            style={{
+              backgroundColor: '#F3F4F6',
+              borderRadius: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              fontSize: 14,
+              color: '#0D1B1E',
+              marginBottom: 12,
+            }}
+          />
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
+              Public
+            </Text>
+            <Switch
+              value={isPublic}
+              onValueChange={setIsPublic}
+              trackColor={{ false: '#E5E7EB', true: '#FECACA' }}
+              thumbColor={isPublic ? '#F12838' : '#D1D5DB'}
+            />
           </View>
-        ) : (
-          <View>
-            <TextInput
-              placeholder="Enter handle"
-              placeholderTextColor={'#9CA3AF'}
-              value={handleInput}
-              onChangeText={setHandleInput}
+
+          {isPublic && (
+            <View
               style={{
-                backgroundColor: '#F3F4F6',
+                backgroundColor: '#FEE2E2',
                 borderRadius: 8,
                 paddingHorizontal: 12,
-                paddingVertical: 10,
-                fontSize: 14,
-                color: '#0D1B1E',
-                marginBottom: 12,
+                paddingVertical: 8,
+                marginBottom: 16,
               }}
-            />
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 14, color: '#0D1B1E', fontWeight: '500' }}>
-                Public
+            >
+              <Text style={{ fontSize: 12, color: '#991B1B', lineHeight: 16 }}>
+                {PLATFORM_VISIBILITY_TERMS[editingPlatform as keyof typeof PLATFORM_VISIBILITY_TERMS] ||
+                  'This account will be visible to your connections.'}
               </Text>
-              <Switch
-                value={isPublic}
-                onValueChange={setIsPublic}
-                trackColor={{ false: '#E5E7EB', true: '#FECACA' }}
-                thumbColor={isPublic ? '#F12838' : '#D1D5DB'}
-              />
             </View>
-
-            {isPublic && (
-              <View
-                style={{
-                  backgroundColor: '#FEE2E2',
-                  borderRadius: 8,
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  marginBottom: 16,
-                }}
-              >
-                <Text style={{ fontSize: 12, color: '#991B1B', lineHeight: 16 }}>
-                  {PLATFORM_VISIBILITY_TERMS[editingPlatform as keyof typeof PLATFORM_VISIBILITY_TERMS] ||
-                    'This account will be visible to your connections.'}
-                </Text>
-              </View>
-            )}
-          </View>
-        )}
+          )}
+        </View>
       </BottomSheet>
 
-      {/* Privacy Toggle Confirmation Popup */}
-      {privacyPopupVisible && (
-        <ConfirmPrivacyTogglePopup
-          isPublic={isPublic}
-          onConfirm={confirmPrivacyToggle}
-          onCancel={() => {
-            setPrivacyPopupVisible(false);
-            setIsPublic(popupOriginalState);
-          }}
-        />
-      )}
     </SafeAreaView>
   );
 }

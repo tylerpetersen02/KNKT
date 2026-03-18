@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, Animated, Pressable } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Modal from 'react-native-modal';
 import type { SortPreference } from '../hooks/useSortPreference';
 
 interface SortSheetProps {
@@ -18,65 +19,29 @@ const SORT_OPTIONS: { value: SortPreference; label: string; icon: string }[] = [
 ];
 
 export default function SortSheet({ isVisible, currentSort, onSortChange, onClose }: SortSheetProps) {
-  const slideAnim = useRef(new Animated.Value(300)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (isVisible) {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 300,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [isVisible, slideAnim, fadeAnim]);
-
   const handleSortSelect = (sort: SortPreference) => {
     onSortChange(sort);
     onClose();
   };
 
   return (
-    <Modal visible={isVisible} transparent animationType="none">
-      {/* Fade overlay */}
-      <Animated.View
+    <Modal
+      isVisible={isVisible}
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
+      swipeDirection="down"
+      onSwipeComplete={onClose}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={300}
+      animationOutTiming={300}
+      backdropTransitionOutTiming={300}
+      useNativeDriver
+      hideModalContentWhileAnimating
+      style={{ margin: 0, justifyContent: 'flex-end' }}
+    >
+      <View
         style={{
-          flex: 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          opacity: fadeAnim,
-        }}
-      >
-        <Pressable style={{ flex: 1 }} onPress={onClose} />
-      </Animated.View>
-
-      {/* Bottom sheet */}
-      <Animated.View
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          transform: [{ translateY: slideAnim }],
           backgroundColor: '#FFFFFF',
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
@@ -151,7 +116,7 @@ export default function SortSheet({ isVisible, currentSort, onSortChange, onClos
             );
           })}
         </View>
-      </Animated.View>
+      </View>
     </Modal>
   );
 }

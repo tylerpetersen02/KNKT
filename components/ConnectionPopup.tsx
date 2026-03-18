@@ -1,18 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
   TextInput,
   ScrollView,
   ActivityIndicator,
-  Animated,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Modal from 'react-native-modal';
 
 interface ConnectionPopupProps {
   visible: boolean;
@@ -38,41 +37,7 @@ export default function ConnectionPopup({
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [connected, setConnected] = useState(false);
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const sheetTranslateY = useRef(new Animated.Value(500)).current;
   const insets = useSafeAreaInsets();
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.timing(overlayOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      setConnected(false);
-      setNote('');
-      Animated.parallel([
-        Animated.timing(overlayOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sheetTranslateY, {
-          toValue: 500,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible, overlayOpacity, sheetTranslateY]);
 
   const handleAccept = async () => {
     setLoading(true);
@@ -84,15 +49,20 @@ export default function ConnectionPopup({
   };
 
   const handleDecline = () => {
-    setConnected(false);
-    setNote('');
     onDecline();
+    setTimeout(() => {
+      setConnected(false);
+      setNote('');
+    }, 300);
   };
 
   const handleViewProfile = () => {
     onViewProfile?.(user.id);
-    setConnected(false);
     onDecline();
+    setTimeout(() => {
+      setConnected(false);
+      setNote('');
+    }, 300);
   };
 
   const initials = user.name
@@ -103,31 +73,33 @@ export default function ConnectionPopup({
     .slice(0, 2);
 
   return (
-    <Modal visible={visible} transparent animationType="none">
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <Animated.View
+    <Modal
+      isVisible={visible}
+      onBackdropPress={handleDecline}
+      onBackButtonPress={handleDecline}
+      swipeDirection="down"
+      onSwipeComplete={handleDecline}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      animationInTiming={300}
+      animationOutTiming={300}
+      backdropTransitionOutTiming={300}
+      useNativeDriver
+      hideModalContentWhileAnimating
+      style={{ margin: 0, justifyContent: 'flex-end' }}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ backgroundColor: '#FFFFFF', borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+      >
+        <View
           style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            opacity: overlayOpacity,
+            backgroundColor: '#FFFFFF',
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
           }}
         >
-          <Animated.View
-            style={{
-              flex: 1,
-              transform: [{ translateY: sheetTranslateY }],
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#FFFFFF',
-                marginTop: 100,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                overflow: 'hidden',
-              }}
-            >
               <ScrollView style={{ flex: 1 }} scrollEnabled={true} keyboardShouldPersistTaps="handled">
               {/* Header */}
               <View
@@ -415,10 +387,8 @@ export default function ConnectionPopup({
                   </>
                 )}
               </View>
-            </ScrollView>
-          </View>
-        </Animated.View>
-        </Animated.View>
+        </ScrollView>
+      </View>
       </KeyboardAvoidingView>
     </Modal>
   );
