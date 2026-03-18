@@ -17,6 +17,7 @@ import { mockReceivedRequests } from './data/mockRequests';
 
 const Tab = createBottomTabNavigator();
 
+
 // TABS NAVIGATOR
 function TabsNavigator({ onLogout }: any) {
   const insets = useSafeAreaInsets();
