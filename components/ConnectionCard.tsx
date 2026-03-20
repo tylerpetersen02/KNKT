@@ -102,49 +102,33 @@ export default function ConnectionCard({
           Connected {getTimeAgo(connectedDate)}
         </Text>
 
-        {/* Row 3: Icons - scrollable */}
+        {/* Row 3: Icons - max 5 with +X indicator */}
         {sharedPlatforms.length > 0 && (
-          <View style={{ position: 'relative', height: 40 }}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={16}
-              scrollEnabled={true}
-            >
-              <View style={{ flexDirection: 'row', gap: 8, paddingRight: 60 }}>
-                {sharedPlatforms.map((platform, idx) => {
-                  const platformInfo = PLATFORM_ICONS[platform.type];
-                  return (
-                    <View
-                      key={idx}
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 16,
-                        backgroundColor: platformInfo.color,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <PlatformIcon platform={platform.type} size={16} />
-                    </View>
-                  );
-                })}
-              </View>
-            </ScrollView>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {sharedPlatforms.slice(0, 5).map((platform, idx) => {
+              const platformInfo = PLATFORM_ICONS[platform.type];
+              return (
+                <View
+                  key={idx}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: platformInfo.color,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <PlatformIcon platform={platform.type} size={16} />
+                </View>
+              );
+            })}
 
-            {/* Fade Overlay on icons */}
-            <View
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: 50,
-                backgroundColor: '#FFFFFF',
-                pointerEvents: 'none',
-              }}
-            />
+            {sharedPlatforms.length > 5 && (
+              <Text style={{ fontSize: 12, fontWeight: '500', color: '#9CA3AF', marginLeft: 4 }}>
+                +{sharedPlatforms.length - 5}
+              </Text>
+            )}
           </View>
         )}
       </TouchableOpacity>
