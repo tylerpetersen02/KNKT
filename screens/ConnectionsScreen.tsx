@@ -380,10 +380,10 @@ export default function ConnectionsScreen() {
                   height: 40,
                 }}
               >
-                <MaterialCommunityIcons name="magnify" size={18} color={'#6B7280'} />
+                <MaterialCommunityIcons name="magnify" size={18} color="#6B7280" />
                 <TextInput
                   placeholder="Search by name..."
-                  placeholderTextColor={'#6B7280'}
+                  placeholderTextColor="#6B7280"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   style={{
@@ -411,7 +411,7 @@ export default function ConnectionsScreen() {
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcons name="sort" size={20} color={'#0D1B1E'} />
+                <MaterialCommunityIcons name="sort" size={20} color="#0D1B1E" />
               </TouchableOpacity>
             </View>
 

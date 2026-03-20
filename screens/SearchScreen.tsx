@@ -239,36 +239,35 @@ export default function SearchScreen() {
     <Pressable onPress={Keyboard.dismiss} style={{ flex: 1 }}>
     <SafeAreaView edges={['left', 'right']} style={{ flex: 1, backgroundColor: '#E8E9EB', paddingTop: 5 }}>
       {/* Search Bar */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: '#FFFFFF',
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: '#E8E9EB',
-          paddingHorizontal: 12,
-          marginHorizontal: 16,
-          marginTop: 5,
-          marginBottom: 12,
-          height: 40,
-        }}
-      >
-        <MaterialCommunityIcons name="magnify" size={18} color="#6B7280" />
-        <TextInput
-          placeholder="Search..."
-          placeholderTextColor="#6B7280"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+      <View style={{ paddingHorizontal: 16, marginTop: 5, marginBottom: 16 }}>
+        <View
           style={{
-            flex: 1,
-            marginLeft: 8,
-            fontSize: 14,
-            fontWeight: '400',
-            color: '#0D1B1E',
-            padding: 0,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#FFFFFF',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#E8E9EB',
+            paddingHorizontal: 12,
+            height: 40,
           }}
-        />
+        >
+          <MaterialCommunityIcons name="magnify" size={18} color="#6B7280" />
+          <TextInput
+            placeholder="Search..."
+            placeholderTextColor="#6B7280"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={{
+              flex: 1,
+              marginLeft: 8,
+              fontSize: 14,
+              fontWeight: '400',
+              color: '#0D1B1E',
+              padding: 0,
+            }}
+          />
+        </View>
       </View>
 
       {/* Tab Bar */}

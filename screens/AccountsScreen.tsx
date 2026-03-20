@@ -180,21 +180,35 @@ export default function AccountsScreen() {
     <SafeAreaView edges={['left', 'right']} backgroundColor="#E8E9EB" style={{ paddingTop: 5 }}>
       <View style={{ flex: 1 }}>
         {/* Search Bar */}
-        <View style={{ paddingHorizontal: 16, paddingVertical: 12, gap: 8 }}>
-          <TextInput
-            placeholder="Search accounts..."
-            placeholderTextColor={'#9CA3AF'}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+        <View style={{ paddingHorizontal: 16, marginTop: 5, marginBottom: 16 }}>
+          <View
             style={{
+              flexDirection: 'row',
+              alignItems: 'center',
               backgroundColor: '#FFFFFF',
               borderRadius: 8,
+              borderWidth: 1,
+              borderColor: '#E8E9EB',
               paddingHorizontal: 12,
-              paddingVertical: 8,
-              fontSize: 14,
-              color: '#0D1B1E',
+              height: 40,
             }}
-          />
+          >
+            <MaterialCommunityIcons name="magnify" size={18} color="#6B7280" />
+            <TextInput
+              placeholder="Search accounts..."
+              placeholderTextColor="#6B7280"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={{
+                flex: 1,
+                marginLeft: 8,
+                fontSize: 14,
+                fontWeight: '400',
+                color: '#0D1B1E',
+                padding: 0,
+              }}
+            />
+          </View>
         </View>
 
         {/* Tab Switcher */}
