@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { SharedPlatform } from '../data/mockConnections';
 import { PLATFORM_ICONS } from '../utils/platformIcons';
@@ -13,6 +13,7 @@ interface ConnectionCardProps {
   note?: string;
   connectedDate: string;
   sharedPlatforms: SharedPlatform[];
+  profilePicture?: string;
   onPress: (id: string) => void;
 }
 
@@ -23,6 +24,7 @@ export default function ConnectionCard({
   note,
   connectedDate,
   sharedPlatforms,
+  profilePicture,
   onPress,
 }: ConnectionCardProps) {
   // Get initials for avatar
@@ -62,11 +64,19 @@ export default function ConnectionCard({
           alignItems: 'center',
           marginRight: 12,
           flexShrink: 0,
+          overflow: 'hidden',
         }}
       >
-        <Text style={{ fontSize: 20, fontWeight: '600', color: '#FFFFFF' }}>
-          {initials}
-        </Text>
+        {profilePicture ? (
+          <Image
+            source={{ uri: profilePicture }}
+            style={{ width: 50, height: 50 }}
+          />
+        ) : (
+          <Text style={{ fontSize: 20, fontWeight: '600', color: '#FFFFFF' }}>
+            {initials}
+          </Text>
+        )}
       </View>
 
       {/* Content Stack - 3 rows: name/username, note/date, icons */}

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from '../components/SafeAreaView';
 import { PLATFORM_ICONS, PLATFORM_VISIBILITY_TERMS } from '../utils/platformIcons';
+import { PlatformIcon } from '../components/PlatformIcon';
 import BottomSheet from '../components/BottomSheet';
 import { mockConnections } from '../data/mockConnections';
 
@@ -363,9 +364,7 @@ export default function AccountsScreen() {
                         marginRight: 12,
                       }}
                     >
-                      {platformInfo?.icon && (
-                        <MaterialCommunityIcons name={platformInfo.icon} size={20} color="#FFFFFF" />
-                      )}
+                      <PlatformIcon platform={account.platform as any} size={20} color="#FFFFFF" />
                     </View>
 
                     <View style={{ flex: 1 }}>

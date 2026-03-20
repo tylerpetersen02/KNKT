@@ -7,6 +7,7 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -185,12 +186,20 @@ export default function RequestDetailModal({
                     backgroundColor: '#0D1B1E',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginBottom: 12,
+                    marginBottom: 16,
+                    overflow: 'hidden',
                   }}
                 >
-                  <Text style={{ fontSize: 32, fontWeight: '600', color: '#FFFFFF' }}>
-                    {initials}
-                  </Text>
+                  {displayUser.avatar_url ? (
+                    <Image
+                      source={{ uri: displayUser.avatar_url }}
+                      style={{ width: 80, height: 80 }}
+                    />
+                  ) : (
+                    <Text style={{ fontSize: 32, fontWeight: '600', color: '#FFFFFF' }}>
+                      {initials}
+                    </Text>
+                  )}
                 </View>
 
                 {/* Name */}

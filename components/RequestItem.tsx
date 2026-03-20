@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import type { RequestItem as RequestItemType } from '../data/mockRequests';
 import { PLATFORM_ICONS } from '../utils/platformIcons';
 import Button from './Button';
@@ -103,11 +103,19 @@ export default function RequestItem({
             alignItems: 'center',
             marginRight: 12,
             flexShrink: 0,
+            overflow: 'hidden',
           }}
         >
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#FFFFFF' }}>
-            {initials}
-          </Text>
+          {displayUser.avatar_url ? (
+            <Image
+              source={{ uri: displayUser.avatar_url }}
+              style={{ width: 50, height: 50 }}
+            />
+          ) : (
+            <Text style={{ fontSize: 20, fontWeight: '600', color: '#FFFFFF' }}>
+              {initials}
+            </Text>
+          )}
         </View>
 
         {/* Pressable Info Section */}

@@ -111,6 +111,7 @@ export interface Connection {
   name: string;
   username: string;
   avatarInitials: string;
+  profilePicture?: string;
   bio?: string;
   note?: string;
   connectedDate: string;
@@ -124,6 +125,7 @@ export const mockConnections: Connection[] = [
     name: 'Sarah Chen',
     username: 'sarahchen',
     avatarInitials: 'SC',
+    profilePicture: 'https://picsum.photos/seed/Sarah/200/200',
     bio: 'Designer & coffee enthusiast ☕',
     note: 'Met at Expo Conf 2024',
     connectedDate: '2024-10-15',
@@ -139,6 +141,7 @@ export const mockConnections: Connection[] = [
     name: 'Jordan Rodriguez',
     username: 'jrodriguez',
     avatarInitials: 'JR',
+    profilePicture: 'https://picsum.photos/seed/Jordan/200/200',
     bio: 'Full-stack developer',
     note: 'Colleague from previous project',
     connectedDate: '2024-09-22',
@@ -155,6 +158,7 @@ export const mockConnections: Connection[] = [
     name: 'Alex Kim',
     username: 'alexkim',
     avatarInitials: 'AK',
+    profilePicture: 'https://picsum.photos/seed/Alex/200/200',
     bio: 'Product Manager at TechCorp',
     note: 'Connected at networking event',
     connectedDate: '2024-08-10',
@@ -171,6 +175,7 @@ export const mockConnections: Connection[] = [
     name: 'Taylor Moore',
     username: 'taylormoore',
     avatarInitials: 'TM',
+    profilePicture: 'https://picsum.photos/seed/Taylor/200/200',
     bio: 'Photographer & creative director',
     connectedDate: '2024-07-05',
     sharedPlatforms: [
@@ -186,6 +191,7 @@ export const mockConnections: Connection[] = [
     name: 'Casey Johnson',
     username: 'caseyjohnson',
     avatarInitials: 'CJ',
+    profilePicture: 'https://picsum.photos/seed/Casey/200/200',
     bio: 'Startup founder & gamer',
     note: 'From Y Combinator cohort',
     connectedDate: '2024-06-18',
@@ -208,6 +214,7 @@ export const mockConnections: Connection[] = [
     name: 'Michael Lubin',
     username: 'mlubin',
     avatarInitials: 'ML',
+    profilePicture: 'https://picsum.photos/seed/Michael/200/200',
     bio: 'Finance enthusiast & social butterfly',
     connectedDate: '2024-11-20',
     sharedPlatforms: [
