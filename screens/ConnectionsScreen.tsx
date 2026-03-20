@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Keyboard,
   Image,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaScrollView } from '../components/SafeAreaScrollView';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ConnectionCard from '../components/ConnectionCard';
@@ -20,6 +21,7 @@ import { openPlatformProfile } from '../utils/platformLinks';
 import { PlatformIcon } from '../components/PlatformIcon';
 
 export default function ConnectionsScreen() {
+  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
@@ -63,21 +65,31 @@ export default function ConnectionsScreen() {
     ? mockConnections.find((c) => c.id === selectedConnectionId)
     : null;
 
+  // Update header when detail view is shown/hidden
+  useEffect(() => {
+    if (selectedConnectionId) {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => setSelectedConnectionId(null)}
+            style={{ paddingLeft: 16, padding: 8 }}
+          >
+            <MaterialCommunityIcons name="chevron-left" size={24} color="#0D1B1E" />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerLeft: () => null,
+      });
+    }
+  }, [selectedConnectionId, navigation]);
+
   // Show detail view if a connection is selected
   if (selectedConnection) {
     return (
       <SafeAreaScrollView scrollable>
         <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => setSelectedConnectionId(null)}
-            style={{ marginBottom: 16 }}
-          >
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#F12838' }}>
-              ← Back to Connections
-            </Text>
-          </TouchableOpacity>
-
           {/* Connection Details */}
           <View
             style={{

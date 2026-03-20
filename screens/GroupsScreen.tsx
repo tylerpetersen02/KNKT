@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Pressable, Keyboard } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaScrollView } from '../components/SafeAreaScrollView';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import GroupCard from '../components/GroupCard';
@@ -7,6 +8,7 @@ import { mockGroups } from '../data/mockGroups';
 import { getTimeAgo } from '../utils/timeUtils';
 
 export default function GroupsScreen() {
+  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
@@ -26,21 +28,31 @@ export default function GroupsScreen() {
     ? mockGroups.find((g) => g.id === selectedGroupId)
     : null;
 
+  // Update header when detail view is shown/hidden
+  useEffect(() => {
+    if (selectedGroupId) {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => setSelectedGroupId(null)}
+            style={{ paddingLeft: 16, padding: 8 }}
+          >
+            <MaterialCommunityIcons name="chevron-left" size={24} color="#0D1B1E" />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerLeft: () => null,
+      });
+    }
+  }, [selectedGroupId, navigation]);
+
   // Show detail view if a group is selected
   if (selectedGroup) {
     return (
       <SafeAreaScrollView scrollable>
         <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => setSelectedGroupId(null)}
-            style={{ marginBottom: 16 }}
-          >
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#F12838' }}>
-              ← Back to Groups
-            </Text>
-          </TouchableOpacity>
-
           {/* Group Details */}
           <View
             style={{
