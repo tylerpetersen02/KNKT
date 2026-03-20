@@ -10,7 +10,7 @@ import RequestsScreen from './screens/RequestsScreen';
 import AccountsScreen from './screens/AccountsScreen';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
-import SearchScreen from './screens/SearchScreen';
+import GroupsScreen from './screens/GroupsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import SideMenu from './components/SideMenu';
 import { mockReceivedRequests } from './data/mockRequests';
@@ -77,12 +77,12 @@ function TabsNavigator({ onLogout }: any) {
         }}
       />
       <Tab.Screen
-        name="Search"
-        component={SearchScreen}
+        name="Groups"
+        component={GroupsScreen}
         options={{
-          headerTitle: 'Search',
-          tabBarLabel: 'Search',
-          tabBarIcon: ({ color }) => <Feather name="search" size={24} color={color} />,
+          headerTitle: 'Groups',
+          tabBarLabel: 'Groups',
+          tabBarIcon: ({ color }) => <Feather name="grid" size={24} color={color} />,
         }}
       />
       <Tab.Screen
