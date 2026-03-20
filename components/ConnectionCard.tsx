@@ -105,7 +105,7 @@ export default function ConnectionCard({
         {/* Row 3: Icons - max 5 with +X indicator */}
         {sharedPlatforms.length > 0 && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            {sharedPlatforms.slice(0, 5).map((platform, idx) => {
+            {[...sharedPlatforms].sort((a, b) => a.type.localeCompare(b.type)).slice(0, 5).map((platform, idx) => {
               const platformInfo = PLATFORM_ICONS[platform.type];
               return (
                 <View
