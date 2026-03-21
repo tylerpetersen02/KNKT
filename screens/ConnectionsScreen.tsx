@@ -194,7 +194,9 @@ export default function ConnectionsScreen() {
               >
                 Shared Platforms
               </Text>
-              {selectedConnection.sharedPlatforms.map((platform, idx) => {
+              {[...selectedConnection.sharedPlatforms].sort((a, b) =>
+                PLATFORM_ICONS[a.type].label.localeCompare(PLATFORM_ICONS[b.type].label)
+              ).map((platform, idx) => {
                 const platformInfo = PLATFORM_ICONS[platform.type];
                 const isPhone = platform.type === 'phone';
                 const isEmail = platform.type === 'email';
@@ -293,7 +295,9 @@ export default function ConnectionsScreen() {
               >
                 Available Platforms
               </Text>
-              {selectedConnection.availablePlatforms.map((platformId, idx) => {
+              {[...selectedConnection.availablePlatforms].sort((a, b) =>
+                PLATFORM_ICONS[a as any].label.localeCompare(PLATFORM_ICONS[b as any].label)
+              ).map((platformId, idx) => {
                 const platformInfo = PLATFORM_ICONS[platformId as any];
                 if (!platformInfo) return null;
                 return (
